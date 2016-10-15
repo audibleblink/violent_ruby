@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+require('thor') # for cli parsing
+
+class Script < Thor
+
+  desc "--host <IP>", "scans an ip address"
+  option :host, required: true
+  # options :all => :boolean, :multiple => :boolean
+  default_task def main
+    puts "Scanning #{options[:host]}"
+  end
+end
+
+Script.start
