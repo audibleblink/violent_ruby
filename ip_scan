@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+require('thor') # for cli parsing
+require('socket')
+require('tcp_timeout')
+require('./lib/views')
+
+
+class Script < Thor
+  include Views
+
+  desc "--hosts 192.168.1.{1..255} --ports 22 53 80 443", "scan ports for given ip addresses"
+  option :hosts, required: true, type: :array
+  option :ports, required: true, type: :array
+  def main
+    
+    options[:hosts].each do |host|
+      pos("Scanning host: #{host}")
+      options[:ports].each do |port|
+        begin
+          sock = TCPTimeout::TCPSocket.new(host, port, connect_timeout: 0.08)
+          pos("  tcp/#{port} open")
+        rescue => e
+          neg("  tcp/#{port} closed")
+        end
+      end
+    end
+
+  end
+  default_task :main
+end
+Script.start
