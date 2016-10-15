@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+require('thor') # for cli parsing
+require('socket')
+require('./lib/views')
+
+
+class Script < Thor
+  include Views
+
+  banner("Banner Grabber\n@4lex")
+
+  desc "--host <IP> --port <PORT>", "attempt to grab a service banner"
+  option :host, required: true
+  option :port, required: true
+
+  default_task def main
+    pos("Getting Info from #{options[:host]}:#{options[:port]}")
+    begin
+      sock = TCPSocket.new(options[:host], options[:port])
+      puts sock.gets
+      sock.close
+    rescue => e
+      neg(e)
+    end
+  end
+end
+Script.start
