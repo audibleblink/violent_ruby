@@ -1,7 +1,11 @@
 #!/usr/bin/env ruby
 require('thor') # for cli parsing
+require_relative('lib/banner')
 
 class Script < Thor
+  extend Banner
+
+  display("A Simple Scanner")
 
   desc "--host <IP>", "scans an ip address"
   option :host, required: true
@@ -10,5 +14,4 @@ class Script < Thor
     puts "Scanning #{options[:host]}"
   end
 end
-
 Script.start
