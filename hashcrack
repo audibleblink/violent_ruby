@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+
+require('thor') # for cli parsing
+require('./lib/views')
+
+
+class Script < Thor
+  include Views
+
+  desc "--hashfile <hash.txt> --wordlist <file.txt>", "crack dat hash"
+  option :hashfile, required: true
+  option :wordlist, required: true
+  def main
+    File.open(options[:hashfile]).each_line do |hash|
+      found = false
+      obj = prep_hash(hash.chomp)
+      File.open(options[:wordlist]).each_line do |word|
+        if hashes_match?(obj, word.chomp)
+          found = true
+          pos("Password found for user #{obj[:user]}: #{word}")
+        end
+      end
+      neg("No passwords found for #{obj[:user]}") unless found
+    end
+  end
+  default_task :main
+
+  no_commands do
+    def prep_hash(hash)
+      user, string = hash.split(":") 
+      type, salt, hash = string[1..-1].split("$")
+      { user: user, type: type, salt: salt, hash: hash }
+    end
+
+    def hashes_match?(obj, attempt)
+      prefix = "$#{obj[:type]}$#{obj[:salt]}"
+      attempt.crypt(prefix) == "#{prefix}$#{obj[:hash]}"
+    end
+  end
+end
+Script.start
